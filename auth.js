@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('../db');
+const db = require('./db'); // FIXED: Changed '../db' to './db'
 
 const router = express.Router();
 
@@ -16,7 +16,6 @@ router.post('/register', async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         
-        // NEW STYLE: db.run with a callback function
         const sql = 'INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)';
         db.run(sql, [email, hashedPassword, name, role], function(err) {
             if (err) {
@@ -36,7 +35,6 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-    // NEW STYLE: db.get with a callback function
     const sql = 'SELECT * FROM users WHERE email = ?';
     db.get(sql, [email], async (err, user) => {
         if (err) {
@@ -47,9 +45,10 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
+        // Make sure you have JWT_SECRET in your Railway Variables!
         const token = jwt.sign(
             { id: user.id, email: user.email, role: user.role, name: user.name },
-            process.env.JWT_SECRET,
+            process.env.JWT_SECRET || 'your_fallback_secret', 
             { expiresIn: '8h' }
         );
 
