@@ -30,7 +30,6 @@
       <button class="btn-secondary" onclick="showRegister()">Create Account</button>
     </div>
     
-    <!-- Registration Modal -->
     <div id="registerModal" class="card" style="display: none; margin-top: 20px;">
       <h2>Register</h2>
       
@@ -59,10 +58,24 @@
         </div>
         
         <button type="submit">Register</button>
+        <button type="button" class="btn-secondary" style="margin-top: 10px;" onclick="hideRegister()">Cancel</button>
       </form>
     </div>
   </div>
   
-  <script src="js/login.js"></script>
+  <script src="login.js"></script>
+  
+  <script>
+    // These functions ensure the buttons actually toggle the registration form
+    function showRegister() {
+      document.getElementById('registerModal').style.display = 'block';
+      document.querySelector('.card').style.display = 'none'; // Hide login card
+    }
+    
+    function hideRegister() {
+      document.getElementById('registerModal').style.display = 'none';
+      document.querySelector('.card').style.display = 'block'; // Show login card
+    }
+  </script>
 </body>
 </html>
