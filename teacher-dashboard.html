@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard - QR Attendance</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="nav">
+      <a href="#" onclick="showSection('generate')">Generate QR</a>
+      <a href="#" onclick="showSection('history')">History</a>
+    </div>
+    
+    <div class="card">
+      <h1>👨‍🏫 Teacher Dashboard</h1>
+      <p style="text-align: center; margin-bottom: 20px;">Welcome, <span id="teacherName"></span></p>
+      
+      <div id="message"></div>
+      
+      <!-- Generate QR Section -->
+      <div id="generateSection">
+        <form id="sessionForm">
+          <div class="form-group">
+            <label for="subject">Subject / Class</label>
+            <input type="text" id="subject" placeholder="e.g., Mathematics 101" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="duration">QR Valid For (minutes)</label>
+            <select id="duration">
+              <option value="5">5 minutes</option>
+              <option value="10" selected>10 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+            </select>
+          </div>
+          
+          <button type="submit">Generate QR Code</button>
+        </form>
+        
+        <div id="qrDisplay" style="display: none;">
+          <div class="session-info">
+            <p><strong id="sessionSubject"></strong></p>
+            <p>Expires in: <span class="timer" id="countdown"></span></p>
+          </div>
+          
+          <div class="qr-container">
+            <img id="qrImage" alt="QR Code">
+          </div>
+          
+          <button onclick="refreshAttendance()">Refresh Attendance Count</button>
+          <p style="text-align: center; margin-top: 12px;">
+            Students present: <strong id="attendanceCount">0</strong>
+          </p>
+        </div>
+      </div>
+      
+      <!-- History Section -->
+      <div id="historySection" style="display: none;">
+        <h2>Session History</h2>
+        <div id="sessionList"></div>
+      </div>
+      
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </div>
+  
+  <script src="js/teacher.js"></script>
+</body>
+</html>

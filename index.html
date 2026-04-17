@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Attendance System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <script>
+    // Auto-redirect based on login state
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    
+    if (token && user) {
+      window.location.href = user.role === 'teacher' 
+        ? '/teacher-dashboard.html' 
+        : '/student-scan.html';
+    } else {
+      window.location.href = '/login.html';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - QR Attendance</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎓 QR Attendance</h1>
+      
+      <div id="message"></div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required>
+        </div>
+        
+        <button type="submit">Login</button>
+      </form>
+      
+      <button class="btn-secondary" onclick="showRegister()">Create Account</button>
+    </div>
+    
+    <!-- Registration Modal -->
+    <div id="registerModal" class="card" style="display: none; margin-top: 20px;">
+      <h2>Register</h2>
+      
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="regName">Full Name</label>
+          <input type="text" id="regName" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="regPassword">Password</label>
+          <input type="password" id="regPassword" required minlength="6">
+        </div>
+        
+        <div class="form-group">
+          <label for="regRole">I am a</label>
+          <select id="regRole" required>
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+          </select>
+        </div>
+        
+        <button type="submit">Register</button>
+      </form>
+    </div>
+  </div>
+  
+  <script src="js/login.js"></script>
+</body>
+</html>
