@@ -1,7 +1,7 @@
 const express = require('express');
 const QRCode = require('qrcode');
 const crypto = require('crypto');
-const db = require('../db');
+const db = require('./db');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const router = express.Router();
