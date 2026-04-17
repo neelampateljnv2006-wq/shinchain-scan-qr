@@ -1,10 +1,22 @@
 const express = require('express');
 const db = require('./db');
-const { authenticateToken, requireRole } = require('../middleware/auth');
+// FIXED: Path changed to './auth' and using the correct function name 'authenticate'
+const { authenticate } = require('./auth'); 
 
 const router = express.Router();
 
-router.use(authenticateToken);
+// FIXED: Using 'authenticate' middleware
+router.use(authenticate);
+
+// Middleware to check role (Optional but safer)
+const requireRole = (role) => (req, res, next) => {
+    if (req.user && req.user.role === role) {
+        next();
+    } else {
+        res.status(403).json({ error: 'Access denied: Students only' });
+    }
+};
+
 router.use(requireRole('student'));
 
 // Mark attendance by scanning QR
@@ -15,7 +27,7 @@ router.post('/mark-attendance', (req, res) => {
         return res.status(400).json({ error: 'Token and sessionId required' });
     }
 
-    // UPDATED: Validate session using db.get callback
+    // Validate session using db.get callback
     db.get('SELECT * FROM sessions WHERE id = ? AND qr_token = ?', [sessionId, token], (err, session) => {
         if (err) {
             return res.status(500).json({ error: 'Database error while checking session' });
@@ -30,7 +42,7 @@ router.post('/mark-attendance', (req, res) => {
             return res.status(410).json({ error: 'QR code has expired' });
         }
 
-        // UPDATED: Mark attendance using db.run callback
+        // Mark attendance using db.run callback
         const insertSql = 'INSERT INTO attendance (session_id, student_id) VALUES (?, ?)';
         db.run(insertSql, [sessionId, req.user.id], function(err) {
             if (err) {
@@ -51,7 +63,6 @@ router.post('/mark-attendance', (req, res) => {
 
 // Get student's attendance history
 router.get('/my-attendance', (req, res) => {
-    // UPDATED: Use db.all to get multiple rows
     const sql = `
         SELECT s.subject, s.created_at as session_date, a.marked_at, u.name as teacher_name
         FROM attendance a
