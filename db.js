@@ -1,17 +1,25 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
-// Connect to the database
-const dbPath = path.join(__dirname, 'attendance.db');
-const db = new sqlite3.Database(dbPath, (err) => {
+// Ensure the database file path is absolute and correct for Linux/Railway
+// Using path.resolve helps prevent path-related startup crashes
+const dbPath = path.resolve(__dirname, 'attendance.db');
+
+// Optional: Check if the file exists or is writable (helpful for debugging logs)
+console.log(`Database path: ${dbPath}`);
+
+const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
-        console.error('Error connecting to database:', err.message);
+        console.error('❌ Error connecting to database:', err.message);
     } else {
-        console.log('Connected to the SQLite database.');
+        console.log('✅ Connected to the SQLite database.');
+        // Enable Foreign Keys for SQLite (Important for your table relationships)
+        db.run('PRAGMA foreign_keys = ON');
     }
 });
 
-// Initialize tables using a serialized run to ensure order
+// Initialize tables
 db.serialize(() => {
     db.run(`
         CREATE TABLE IF NOT EXISTS users (
