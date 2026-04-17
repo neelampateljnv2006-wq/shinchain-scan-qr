@@ -1,10 +1,10 @@
 {
   "name": "qr-attendance",
   "version": "1.0.0",
-  "main": "server/index.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "node --watch server/index.js"
+    "start": "node index.js",
+    "dev": "node --watch index.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
