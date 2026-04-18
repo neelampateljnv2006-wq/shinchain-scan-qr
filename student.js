@@ -31,24 +31,39 @@ router.post('/mark-attendance', (req, res) => {
 
     // 1. Verify the session exists and the token matches
     db.get('SELECT * FROM sessions WHERE id = ? AND qr_token = ?', [sessionId, token], (err, session) => {
-        if (err) return res.status(500).json({ error: 'Database error' });
-        if (!session) return res.status(404).json({ error: 'This QR code is invalid' });
+        if (err) {
+            console.error("Session Lookup Error:", err.message);
+            return res.status(500).json({ error: 'Database error' });
+        }
+        
+        if (!session) {
+            return res.status(404).json({ error: 'This QR code is invalid or does not exist' });
+        }
 
         // 2. Check if the QR has expired
-        if (new Date(session.expires_at) < new Date()) {
+        const now = new Date();
+        const expiry = new Date(session.expires_at);
+        if (expiry < now) {
             return res.status(410).json({ error: 'This QR code has expired' });
         }
 
         // 3. Insert attendance record
+        // We use req.user.id from the authenticate middleware
         const insertSql = 'INSERT INTO attendance (session_id, student_id) VALUES (?, ?)';
+        
         db.run(insertSql, [sessionId, req.user.id], function(err) {
             if (err) {
-                if (err.message.includes('UNIQUE constraint')) {
+                console.error("Attendance Insert Error:", err.message);
+                
+                // Specifically handle the UNIQUE constraint we added in db.js
+                if (err.message.includes('UNIQUE constraint') || err.message.includes('unique_attendance')) {
                     return res.status(409).json({ error: 'You have already marked attendance for this class' });
                 }
+                
                 return res.status(500).json({ error: 'Failed to record attendance' });
             }
 
+            console.log(`✅ Attendance recorded for student ${req.user.id} in session ${sessionId}`);
             res.json({ 
                 message: 'Success!',
                 subject: session.subject
@@ -59,7 +74,6 @@ router.post('/mark-attendance', (req, res) => {
 
 /**
  * GET /api/student/my-attendance
- * Returns all past attendance for the logged-in student
  */
 router.get('/my-attendance', (req, res) => {
     const sql = `
@@ -71,7 +85,10 @@ router.get('/my-attendance', (req, res) => {
         ORDER BY a.marked_at DESC`;
 
     db.all(sql, [req.user.id], (err, records) => {
-        if (err) return res.status(500).json({ error: 'Failed to fetch history' });
+        if (err) {
+            console.error("History Fetch Error:", err.message);
+            return res.status(500).json({ error: 'Failed to fetch history' });
+        }
         res.json(records || []);
     });
 });
