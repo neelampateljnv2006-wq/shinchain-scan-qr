@@ -1,14 +1,13 @@
 const express = require('express');
 const db = require('./db');
-// FIXED: Path changed to './auth' and using the correct function name 'authenticate'
 const { authenticate } = require('./auth'); 
 
 const router = express.Router();
 
-// FIXED: Using 'authenticate' middleware
+// Apply Authentication
 router.use(authenticate);
 
-// Middleware to check role (Optional but safer)
+// Middleware to strictly enforce Student role
 const requireRole = (role) => (req, res, next) => {
     if (req.user && req.user.role === role) {
         next();
@@ -19,64 +18,61 @@ const requireRole = (role) => (req, res, next) => {
 
 router.use(requireRole('student'));
 
-// Mark attendance by scanning QR
+/**
+ * POST /api/student/mark-attendance
+ * Validates the QR token and records attendance in the DB
+ */
 router.post('/mark-attendance', (req, res) => {
     const { token, sessionId } = req.body;
 
     if (!token || !sessionId) {
-        return res.status(400).json({ error: 'Token and sessionId required' });
+        return res.status(400).json({ error: 'Invalid QR data' });
     }
 
-    // Validate session using db.get callback
+    // 1. Verify the session exists and the token matches
     db.get('SELECT * FROM sessions WHERE id = ? AND qr_token = ?', [sessionId, token], (err, session) => {
-        if (err) {
-            return res.status(500).json({ error: 'Database error while checking session' });
-        }
-        
-        if (!session) {
-            return res.status(404).json({ error: 'Invalid QR code' });
-        }
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (!session) return res.status(404).json({ error: 'This QR code is invalid' });
 
-        // Check expiration
+        // 2. Check if the QR has expired
         if (new Date(session.expires_at) < new Date()) {
-            return res.status(410).json({ error: 'QR code has expired' });
+            return res.status(410).json({ error: 'This QR code has expired' });
         }
 
-        // Mark attendance using db.run callback
+        // 3. Insert attendance record
         const insertSql = 'INSERT INTO attendance (session_id, student_id) VALUES (?, ?)';
         db.run(insertSql, [sessionId, req.user.id], function(err) {
             if (err) {
                 if (err.message.includes('UNIQUE constraint')) {
-                    return res.status(409).json({ error: 'Attendance already marked' });
+                    return res.status(409).json({ error: 'You have already marked attendance for this class' });
                 }
-                return res.status(500).json({ error: 'Failed to mark attendance' });
+                return res.status(500).json({ error: 'Failed to record attendance' });
             }
 
             res.json({ 
-                message: 'Attendance marked successfully',
-                subject: session.subject,
-                time: new Date().toISOString()
+                message: 'Success!',
+                subject: session.subject
             });
         });
     });
 });
 
-// Get student's attendance history
+/**
+ * GET /api/student/my-attendance
+ * Returns all past attendance for the logged-in student
+ */
 router.get('/my-attendance', (req, res) => {
     const sql = `
-        SELECT s.subject, s.created_at as session_date, a.marked_at, u.name as teacher_name
+        SELECT s.subject, a.marked_at, u.name as teacher_name
         FROM attendance a
         JOIN sessions s ON a.session_id = s.id
         JOIN users u ON s.teacher_id = u.id
         WHERE a.student_id = ?
-        ORDER BY a.marked_at DESC
-    `;
+        ORDER BY a.marked_at DESC`;
 
     db.all(sql, [req.user.id], (err, records) => {
-        if (err) {
-            return res.status(500).json({ error: 'Failed to fetch attendance history' });
-        }
-        res.json(records);
+        if (err) return res.status(500).json({ error: 'Failed to fetch history' });
+        res.json(records || []);
     });
 });
 
