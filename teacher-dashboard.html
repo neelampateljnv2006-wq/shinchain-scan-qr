@@ -39,12 +39,16 @@
           <button type="submit">Generate QR Code</button>
         </form>
         
-        <div id="qrResult" style="text-align: center; margin-top: 20px;">
-          </div>
+        <div id="qrResult" style="text-align: center; margin-top: 20px;"></div>
       </div>
       
       <div id="historySection" class="dashboard-section" style="display: none;">
-        <h2>Session History</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h2 style="margin: 0;">Session History</h2>
+          <button id="downloadBtn" onclick="downloadHistory()" style="background: #27ae60; padding: 8px 12px; font-size: 0.85em; width: auto; margin: 0; display: none;">
+            📥 Download CSV
+          </button>
+        </div>
         <div id="sessionList"></div>
       </div>
       
