@@ -10,8 +10,8 @@
 <body>
   <div class="container">
     <div class="nav">
-      <a href="#" onclick="showSection('scan')">Scan QR</a>
-      <a href="#" onclick="showSection('history')">My Attendance</a>
+      <a href="#" onclick="showSection('scanSection')">Scan QR</a>
+      <a href="#" onclick="showSection('historySection')">My Attendance</a>
     </div>
     
     <div class="card">
@@ -20,7 +20,7 @@
       
       <div id="message"></div>
       
-      <div id="scanSection">
+      <div id="scanSection" class="dashboard-section">
         <p style="text-align: center; margin-bottom: 16px;">
           Point your camera at the QR code displayed by your teacher
         </p>
@@ -33,15 +33,15 @@
         </div>
       </div>
       
-      <div id="historySection" style="display: none;">
+      <div id="historySection" class="dashboard-section" style="display: none;">
         <h2>My Attendance History</h2>
         <div id="attendanceList"></div>
       </div>
       
-      <button class="logout-btn" onclick="logout()" style="margin-top: 20px;">Logout</button>
+      <button class="logout-btn" onclick="logout()" style="margin-top: 20px; background: #ff4757;">Logout</button>
     </div>
   </div>
   
-  <script src="js/student.js"></script>
+  <script src="student-logic.js"></script>
 </body>
 </html>
