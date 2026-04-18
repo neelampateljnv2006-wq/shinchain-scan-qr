@@ -1,11 +1,12 @@
-// This runs in your BROWSER
 const API = '';
 
 // Function to switch between "Generate QR" and "History" tabs
 window.showSection = function(sectionId) {
-    document.querySelectorAll('.card').forEach(card => {
-        card.style.display = 'none';
+    // Hide all internal sections
+    document.querySelectorAll('.dashboard-section').forEach(section => {
+        section.style.display = 'none';
     });
+    // Show the targeted section
     const target = document.getElementById(sectionId);
     if (target) target.style.display = 'block';
 }
@@ -14,6 +15,7 @@ window.showSection = function(sectionId) {
 document.getElementById('qrForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const subject = document.getElementById('subject').value;
+    const duration = document.getElementById('duration').value;
     
     try {
         const res = await fetch(`${API}/api/teacher/create-session`, {
@@ -22,20 +24,42 @@ document.getElementById('qrForm')?.addEventListener('submit', async (e) => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             },
-            body: JSON.stringify({ subject })
+            body: JSON.stringify({ subject, validMinutes: duration })
         });
+        
         const data = await res.json();
+        
         if (res.ok) {
-            document.getElementById('qrResult').innerHTML = `<img src="${data.qrCode}">`;
+            document.getElementById('qrResult').innerHTML = `
+                <h3>${data.subject}</h3>
+                <img src="${data.qrCode}" style="max-width: 100%; border: 10px solid white; border-radius: 10px;">
+                <p>Scan this to mark attendance</p>
+            `;
+        } else {
+            alert(data.error || 'Failed to generate QR');
         }
     } catch (err) {
-        alert('Error generating QR');
+        console.error(err);
+        alert('Connection error');
     }
 });
 
-// Load name on start
+// Logout Function
+window.logout = function() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
+}
+
+// Load name and setup UI on start
 window.onload = () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     if (user.name) document.getElementById('teacherName').innerText = user.name;
-    showSection('generate-qr'); // Default view
+    
+    // Check if token exists, otherwise redirect to login
+    if (!localStorage.getItem('token')) {
+        window.location.href = 'login.html';
+    }
+
+    showSection('generateSection'); // Default view
 };
