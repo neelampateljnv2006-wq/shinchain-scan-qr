@@ -53,13 +53,21 @@ window.logout = function() {
 
 // Load name and setup UI on start
 window.onload = () => {
+    const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    if (user.name) document.getElementById('teacherName').innerText = user.name;
-    
-    // Check if token exists, otherwise redirect to login
-    if (!localStorage.getItem('token')) {
+
+    // 1. Check if token exists
+    if (!token || token === 'undefined') {
+        console.log("No token found, redirecting to login...");
         window.location.href = 'login.html';
+        return; // Stop execution here
     }
 
-    showSection('generateSection'); // Default view
+    // 2. Set the Name
+    if (user.name) {
+        document.getElementById('teacherName').innerText = user.name;
+    }
+
+    // 3. Show the starting section
+    showSection('generateSection');
 };

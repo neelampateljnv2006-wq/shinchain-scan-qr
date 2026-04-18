@@ -108,13 +108,24 @@ function showMessage(text, type) {
 }
 
 // Redirect if already logged in (Check on page load)
+// Redirect if already logged in (Check on page load)
 window.addEventListener('load', () => {
     const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     
-    // Check current path to avoid infinite redirect loops
-    const currentPath = window.location.pathname;
-    if (token && user && (currentPath.includes('login.html') || currentPath === '/')) {
-        window.location.href = user.role === 'teacher' ? 'teacher-dashboard.html' : 'student-scan.html';
+    // Get the current filename (e.g., 'login.html' or 'teacher-dashboard.html')
+    const path = window.location.pathname;
+    const page = path.split("/").pop(); 
+
+    // ONLY redirect to dashboard if the user is on the login page or the root site
+    const isAtLogin = page === '' || page === 'index.html' || page === 'login.html';
+
+    if (token && user && isAtLogin) {
+        console.log("User already logged in. Redirecting to dashboard...");
+        if (user.role === 'teacher') {
+            window.location.href = 'teacher-dashboard.html';
+        } else {
+            window.location.href = 'student-scan.html';
+        }
     }
 });
